@@ -1,0 +1,69 @@
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.8
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://redpanda:9092
+    ports:
+      - "9092:9092"
+
+  producer:
+    build: .
+    command: ["fleet-telemetry", "produce", "--input", "sample_data/sample_events.jsonl", "--delay-seconds", "0.02"]
+    environment:
+      BROKER_BACKEND: kafka
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      LAKEHOUSE_ROOT: /app/data/lakehouse
+      DUCKDB_PATH: /app/data/lakehouse/warehouse.duckdb
+    depends_on:
+      - redpanda
+    volumes:
+      - fleet_data:/app/data
+
+  consumer:
+    build: .
+    command: ["fleet-telemetry", "consume", "--max-batches", "20", "--batch-size", "25", "--poll-seconds", "1.0"]
+    environment:
+      BROKER_BACKEND: kafka
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      KAFKA_CONSUMER_GROUP: fleet-telemetry-consumer
+      LAKEHOUSE_ROOT: /app/data/lakehouse
+      DUCKDB_PATH: /app/data/lakehouse/warehouse.duckdb
+    depends_on:
+      - redpanda
+    volumes:
+      - fleet_data:/app/data
+
+  api:
+    build: .
+    command: ["fleet-telemetry", "api", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      BROKER_BACKEND: kafka
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      LAKEHOUSE_ROOT: /app/data/lakehouse
+      DUCKDB_PATH: /app/data/lakehouse/warehouse.duckdb
+      API_HOST: 0.0.0.0
+      API_PORT: 8080
+    depends_on:
+      - consumer
+    volumes:
+      - fleet_data:/app/data
+    ports:
+      - "8080:8080"
+
+volumes:
+  fleet_data:
