@@ -38,7 +38,7 @@ def enrich_event(event: TelemetryEvent) -> EnrichedTelemetryEvent:
     )
 
 
-def score_event(event: EnrichedTelemetryEvent) -> PredictionRecord:
+def scoring_event(event: EnrichedTelemetryEvent) -> PredictionRecord:
     score = 0.15
     score += 0.30 if event.temperature_alert else 0.0
     score += 0.25 if event.battery_alert else 0.0
