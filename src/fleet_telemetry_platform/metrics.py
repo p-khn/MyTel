@@ -18,5 +18,5 @@ PREDICTIONS_WRITTEN = Counter(
 BATCH_DURATION = Histogram(
     "fleet_batch_duration_seconds",
     "Duration spent processing a batch",
-    buckets=(0.01, 0.05, 0.1, 0.5, 1, 2, 5),
+    buckets=(0.01, 0.05, 0.1, 0.5, 1, 2, 5, 8),
 )
