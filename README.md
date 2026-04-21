@@ -60,12 +60,6 @@ http://localhost:8080
 - `GET /predictions/latest`
 - `GET /metrics`
 
-## Why This Project
-
-MyTel demonstrates how raw telemetry data can be turned into a practical data platform with ingestion, validation, enrichment, curated storage, observability, and API access.
-
-It is intended as a portfolio project for data engineering, telemetry pipelines, IoT systems, and backend analytics workflows.
-
 ## License
 
 MIT
